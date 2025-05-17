@@ -13,6 +13,9 @@ class PileMaisNormal:
         element = self.peek
         self.__data.pop(-1)
         return element
+
+    @property
+    def height(self): return len(self.__data)
     
     @property
     def is_empty(self): return len(self.__data) == 0
@@ -66,7 +69,7 @@ class Partie:
             else:
                 streak = 0
             return False
-        mx = max(0, pos.x - self.taille_puissance + 1)
+        mx = max(0, pos.x - self.taille_puissance)
         Mx = min(self.dimention.x - 1, pos.x + self.taille_puissance)
         p = Vecteur(mx, pos.y)
         while p.x < Mx:
@@ -82,14 +85,15 @@ class Partie:
         mx = min(pos.x, pos.y)
         Mx = self.dimention.x - 1
         p = Vecteur(pos.x - mx, pos.y - mx)
-        while p.x < Mx:
+        while p.x < Mx and p.y < self.dimention.y:
             if check(): return True
             p.x += 1
             p.y += 1
         streak = 0
         mx = min(self.dimention.x - pos.x - 1, pos.y)
+        Mx = self.dimention.y
         p = Vecteur(pos.x + mx, pos.y - mx)
-        while p.y < Mx:
+        while p.y < Mx and p.x >= 0:
             if check(): return True
             p.x -= 1
             p.y += 1
@@ -139,9 +143,9 @@ class Partie:
             ligne = "|"
             x = 0
             while x < self.dimention.x:
-                if (self.grille[x][y] == 1):
+                if (self.grille[x][y] == 2):
                     ligne += str(self.j1.pion) + "|"
-                elif (self.grille[x][y] == 2):
+                elif (self.grille[x][y] == 1):
                     ligne += str(self.j2.pion) + "|"
                 else:
                     ligne += " |"
@@ -232,8 +236,7 @@ class Joueur:
         debut = time.time()
         coup = -1
         while coup not in choix:
-            print(f"{self.nom}, entrez une colonne valide : ")
-            entree = input()
+            entree = input(self.nom + " (" + self.pion + ") " + str(round(self.temps)) + "s > ")
             i = 0
             while i < len(entree) and '0' <= entree[i] <= '9':#pour s'assurer que l'entree ne contient que des chiffres
                 i += 1

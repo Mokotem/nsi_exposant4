@@ -97,7 +97,7 @@ if __name__ == "__main__":
             print(adversaire, "a rejoin la partie.")
             hote.Envoyer(input("message de bienvenue > "))
             print(adversaire + ":", '"'+hote.Recevoir()+'"')
-            joueprems = demander("qui joue en premier ?", "moi", "adversaire")
+            joueprems = demander("qui joue en premier ?", "moi", adversaire)
             hote.Envoyer("d" if joueprems else "p")
             if (joueprems):
                 print("Vous jouez en premier.")
@@ -115,15 +115,16 @@ if __name__ == "__main__":
             hote.Envoyer(input("message de presentation > "))
             if (hote.Recevoir() == "d"):
                 print("Vous jouez en deuxieme.")
-                j1 = JoueurReseaux("adversaire", "X", 60, hote)
-                j2 = JoueurHote("vous", "O", 60, hote)
+                j1 = JoueurReseaux(adversaire, "X", 60, hote)
+                j2 = JoueurHote(name, "O", 60, hote)
             else:
                 print("Vous jouez en premier.")
-                j1 = JoueurHote("vous", "X", 60, hote)
-                j2 = JoueurReseaux("adversaire", "O", 60, hote)
+                j1 = JoueurHote(name, "X", 60, hote)
+                j2 = JoueurReseaux(adversaire, "O", 60, hote)
 
 
     partie = Partie(Vecteur(7, 6), 4, j1, j2)
+    Bot.Partie = partie
     partie.afficher()
     
     while not partie.finito:

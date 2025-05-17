@@ -44,12 +44,26 @@ class Partie:
         else:
             self.code = ""
             self.hasCode = False
+        self.hostISFirst = True
         
     def Rejoindre(self, invitee: Client):
         self.bloque = True
         self.invitee = invitee
         self.host.Envoyer(invitee.NAME)
         invitee.Envoyer(self.host.NAME)
+
+        # messages de presentations
+        data = self.host.CONNECTION.recv(Client.SIZE)
+        self.invitee.CONNECTION.send(data)
+        data = self.invitee.CONNECTION.recv(Client.SIZE)
+        self.host.CONNECTION.send(data)
+        
+        data = self.host.CONNECTION.recv(Client.SIZE)
+        self.invitee.CONNECTION.send(data)
+        if data.decode() == "p":
+            data = self.invitee.CONNECTION.recv(Client.SIZE)
+            self.host.CONNECTION.send(data)
+
         tache = Thread.Thread(target=self.Tache_Communication)
         tache.start()
         
@@ -96,7 +110,7 @@ class Server:
         
     def Tache_Nettoyage(self):
         while self.running:
-            sleep(3)
+            sleep(1)
             i = 0
             while i < len(self.parties):
                 if (not self.parties[i].running):
@@ -114,11 +128,6 @@ class Server:
     def Tache_Accueillir(self, conn: Sock.socket, adre: str):
         conn.send(Server.CONNECTION_REUSSI)
         requete = conn.recv(Client.SIZE).decode()
-        """
-        sous la forme 'XXnom_du_client'
-        les deux premier caractere: "hh" creer une partie
-        "05": rejoindre la 5eme partie
-        """
         c = Client(conn, adre, requete)
         self.nombreDeConnec += 1
         requete = "ra"
