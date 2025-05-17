@@ -17,17 +17,6 @@ class PileMaisNormal:
     @property
     def is_empty(self): return len(self.__data) == 0
 
-    def clear(self):
-        self.__data = list()
-
-    def edit(self, value):
-        self.__data[-1] = value
-
-    @property
-    def height(self): return len(self.__data)
-
-    def __str__(self): return self.__data.__str__()
-
 class Partie:
     def __init__(self, dim, taille_p: int, p1, p2):
         # la taille du plateau est variable
@@ -44,7 +33,7 @@ class Partie:
         
         # si la partie est fini
         self.__finito = False
-        self.__ligneChiffres = "     "
+        self.__ligneChiffres = " "
         y = 0
         while y < self.dimention.x:
             self.__ligneChiffres += str(y + 1) + " "
@@ -55,64 +44,59 @@ class Partie:
     @property
     def finito(self):
         return self.__finito
-
-    def get_score(self) -> int:
-        """
-        >0: X gagne,
-        <0: O gagne
-        """
-        if self.__finito:
-            return 1 if self.est_j1 else -1
-        return 0
-
         
     def defaire(self):
         """
         annule le dernier coup joue.
         """
-        self.__finito = False
+        self.finito = False
         self.grille[self.__pileDesCoups.pop()].retirer()
-        self.est_j1 = not self.est_j1
-        self.joueur = self.j1 if self.est_j1 else self.j2
         
     def alignes(self, pos):
-        case = self.grille[pos.x][pos.y]
-        for dire in ((1, 0), (0, 1), (1, 1), (-1, 1)):
-            compteur = 0
-            pos_act = Vecteur(pos.x, pos.y)
-
-            if (dire[0] < 0):
-                m = min(self.dimention.x - pos_act.x - 1, pos_act.y, self.taille_puissance)
-                pos_act.x += m
-                pos_act.y -= m
-                while pos_act.x > -1 and \
-                    pos_act.y < self.dimention.y:
-                    if self.grille[pos_act.x][pos_act.y] == case:
-                        compteur += 1
-                        if compteur >= self.taille_puissance:
-                            return True
-                    else:
-                        compteur = 0
-                    pos_act.x += dire[0]
-                    pos_act.y += dire[1]
+        pion = self.grille[pos.x][pos.y]
+        streak = 0
+        p = Vecteur(0, 0)
+        
+        def check() -> bool:
+            nonlocal streak
+            if self.grille[p.x][p.y] == pion:
+                streak += 1
+                if (streak >= self.taille_puissance):
+                    return True
             else:
-                while pos_act.x >= 0 and pos_act.y >= 0:
-                    pos_act.x -= dire[0]
-                    pos_act.y -= dire[1]
-                pos_act.x += dire[0]
-                pos_act.y += dire[1]
-
-                while pos_act.x < self.dimention.x and \
-                    pos_act.y < self.dimention.y:
-                    if self.grille[pos_act.x][pos_act.y] == case:
-                        compteur += 1
-                        if compteur >= self.taille_puissance:
-                            return True
-                    else:
-                        compteur = 0
-                    pos_act.x += dire[0]
-                    pos_act.y += dire[1]
+                streak = 0
+            return False
+        mx = max(0, pos.x - self.taille_puissance + 1)
+        Mx = min(self.dimention.x - 1, pos.x + self.taille_puissance)
+        p = Vecteur(mx, pos.y)
+        while p.x < Mx:
+            if check(): return True
+            p.x += 1
+        streak = 0
+        Mx = min(self.dimention.y - 1, pos.y + self.taille_puissance)
+        p = Vecteur(pos.x, 0)
+        while p.y < Mx:
+            if check(): return True
+            p.y += 1
+            
+        mx = min(pos.x, pos.y)
+        Mx = self.dimention.x - 1
+        p = Vecteur(pos.x - mx, pos.y - mx)
+        while p.x < Mx:
+            if check(): return True
+            p.x += 1
+            p.y += 1
+        streak = 0
+        mx = min(self.dimention.x - pos.x - 1, pos.y)
+        p = Vecteur(pos.x + mx, pos.y - mx)
+        while p.y < Mx:
+            if check(): return True
+            p.x -= 1
+            p.y += 1
+            
         return False
+        
+        
     
     
     
@@ -129,8 +113,9 @@ class Partie:
         
         if self.alignes(Vecteur(colonne, len(self.grille[colonne]) - 1)):
             self.__finito = True
-        self.est_j1 = not self.est_j1
-        self.joueur = self.j1 if self.est_j1 else self.j2
+        else:
+            self.est_j1 = not self.est_j1
+            self.joueur = self.j1 if self.est_j1 else self.j2
     
     def coups_legaux(self) -> list:
         """
@@ -139,7 +124,6 @@ class Partie:
         (sortie: list int, ou les entiers designent le
         numero de la colonne)
         """
-        if self.__finito: return list()
         res = list()
         i = 0
         while i < self.dimention.x:
@@ -152,7 +136,7 @@ class Partie:
         print(self.__ligneChiffres)
         y = self.dimention.y - 1
         while y >= 0:
-            ligne = "    |"
+            ligne = "|"
             x = 0
             while x < self.dimention.x:
                 if (self.grille[x][y] == 1):
@@ -185,7 +169,7 @@ class Pile:
         if self.est_vide(): raise Exception("pile vide sah")
         i = len(self.__data) - 1
         while (self.__data[i] == 0):
-            i -= 1
+            i += 1
         self.__data[i] = 0
     
     def est_vide(self) -> bool:
