@@ -49,23 +49,26 @@ class Partie:
     def Rejoindre(self, invitee: Client):
         self.bloque = True
         self.invitee = invitee
-        self.host.Envoyer(invitee.NAME)
-        invitee.Envoyer(self.host.NAME)
 
         # messages de presentations
-        data = self.host.CONNECTION.recv(Client.SIZE)
-        self.invitee.CONNECTION.send(data)
-        data = self.invitee.CONNECTION.recv(Client.SIZE)
-        self.host.CONNECTION.send(data)
-        
-        data = self.host.CONNECTION.recv(Client.SIZE)
-        self.invitee.CONNECTION.send(data)
-        if data.decode() == "p":
+        try:
+            self.host.Envoyer(invitee.NAME)
+            invitee.Envoyer(self.host.NAME)
+            data = self.host.CONNECTION.recv(Client.SIZE)
+            self.invitee.CONNECTION.send(data)
             data = self.invitee.CONNECTION.recv(Client.SIZE)
             self.host.CONNECTION.send(data)
-
-        tache = Thread.Thread(target=self.Tache_Communication)
-        tache.start()
+        
+            data = self.host.CONNECTION.recv(Client.SIZE)
+            self.invitee.CONNECTION.send(data)
+            if data.decode() == "p":
+                data = self.invitee.CONNECTION.recv(Client.SIZE)
+                self.host.CONNECTION.send(data)
+                tache = Thread.Thread(target=self.Tache_Communication)
+                tache.start()
+        except:
+            self.bloque = True
+            self.running = False
         
     def Tache_Communication(self):
         while self.running:
@@ -143,6 +146,7 @@ class Server:
                 id_partie = int(requete) - 1
                 if self.parties[id_partie].bloque:
                     conn.send(Server.PARTIE_BLOQUEE)
+                    requete = "ra"
                 elif self.parties[id_partie].hasCode:
                     conn.send(Server.CODE_REQUI)
                 else:
@@ -160,11 +164,11 @@ class Server:
         while i < Server.PARTIE_LIMIT:
             if i < t - int(nombre_bloque):
                 if not codes[i]:
-                    print("    ("+str(i + 1)+") {mdp requis} hote:", names[i])
+                    print("    ("+str(i + 1)+") {mdp requis}  hote:", names[i])
                 else:
-                    print("    ("+str(i + 1)+")              hote:", names[i])
+                    print("    ("+str(i + 1)+")  hote:", names[i])
             elif i < t + int(nombre_bloque) - 1:
-                print("    En jeu.                       hote:", names[i])
+                print("    En jeu.  hote:", names[i])
             else:
                 print("    ... vide")
             i += 1
@@ -192,10 +196,10 @@ class Server:
 if __name__ == "__main__":
     serv = Server()
     while True:
+        input("rafraichir")
         d = serv.Encode()
         print(d)
         data = Server.Decode(d)
         print(data)
         serv.AfficherParties(data[0], data[1], data[2])
-        input("rafraichir")
         

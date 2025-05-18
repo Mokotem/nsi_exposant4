@@ -1,0 +1,3 @@
+pythonanywere:
+    name: nsiExposant4Project
+    mdp: laplacedepythoncestalacuisine
