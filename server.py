@@ -3,7 +3,7 @@ import threading as Thread
 from time import sleep
 
 class Machine:  # client chez la machine de l'utilisateur
-    SERVER_ADRESS = "192.168.1.19"
+    SERVER_ADRESS = "192.168.142.168"
     
     def __init__(self):
         self.sock = Sock.socket(Sock.AF_INET, Sock.SOCK_STREAM)

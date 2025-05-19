@@ -140,8 +140,7 @@ if __name__ == "__main__":
             coup = partie.joueur.choisir(partie.coups_legaux())
             partie.jouer_coup(coup)
             partie.afficher()
-
+        hote.Envoyer("exit")
         sleep(1)
         print(partie.joueur.nom, "a gagnee !!!!!!")
-            
 input("finito!")
