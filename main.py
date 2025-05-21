@@ -48,6 +48,7 @@ class JoueurHote(Joueur):
 if __name__ == "__main__":
     running = True
     while running:
+        en_ligne = False
         if demander("jouer", "local", "en ligne"):
             if demander("jouer", "multijoueur", "contre l'ordinateur"):
                 j1 = Joueur("player1", "O", 60 * 5)
@@ -60,6 +61,7 @@ if __name__ == "__main__":
                     j1 = Bot("player1", "O", 60 * 5)
                     j2 = Joueur("player2", "X", 60 * 5)
         else:
+            en_ligne = True
             name = input("pseudonyme > ")
             while len(name) < 3 or len(name) > 16 or name == "b":
                 print("ce nom n'est pas autorise.")
@@ -140,7 +142,9 @@ if __name__ == "__main__":
             coup = partie.joueur.choisir(partie.coups_legaux())
             partie.jouer_coup(coup)
             partie.afficher()
-        hote.Envoyer("exit")
+        if en_ligne:
+            hote.Envoyer("exit")
         sleep(1)
         print(partie.joueur.nom, "a gagnee !!!!!!")
+            
 input("finito!")

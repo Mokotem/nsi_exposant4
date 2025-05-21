@@ -19,6 +19,12 @@ class PileMaisNormal:
     
     @property
     def is_empty(self): return len(self.__data) == 0
+    
+    def edit(self, value):
+        self.__data[len(self.__data) - 1] = value
+        
+    def __str__(self):
+        return self.__data.__str__()
 
 class Partie:
     def __init__(self, dim, taille_p: int, p1, p2):
@@ -44,6 +50,14 @@ class Partie:
             
         self.__pileDesCoups = PileMaisNormal()
         
+    def get_score(self):
+        if self.__finito:
+            return -1 if self.est_j1 else 1
+        return 0
+
+    def get_pire(self):
+        return 1 if self.est_j1 else -1
+        
     @property
     def finito(self):
         return self.__finito
@@ -52,8 +66,11 @@ class Partie:
         """
         annule le dernier coup joue.
         """
-        self.finito = False
+        self.__finito = False
         self.grille[self.__pileDesCoups.pop()].retirer()
+        self.est_j1 = not self.est_j1
+        self.joueur = self.j1 if self.est_j1 else self.j2
+        
         
     def alignes(self, pos):
         pion = self.grille[pos.x][pos.y]
@@ -72,20 +89,20 @@ class Partie:
         mx = max(0, pos.x - self.taille_puissance)
         Mx = min(self.dimention.x - 1, pos.x + self.taille_puissance)
         p = Vecteur(mx, pos.y)
-        while p.x < Mx:
+        while p.x <= Mx:
             if check(): return True
             p.x += 1
         streak = 0
         Mx = min(self.dimention.y - 1, pos.y + self.taille_puissance)
         p = Vecteur(pos.x, 0)
-        while p.y < Mx:
+        while p.y <= Mx:
             if check(): return True
             p.y += 1
-            
+        streak = 0
         mx = min(pos.x, pos.y)
         Mx = self.dimention.x - 1
         p = Vecteur(pos.x - mx, pos.y - mx)
-        while p.x < Mx and p.y < self.dimention.y:
+        while p.x <= Mx and p.y < self.dimention.y:
             if check(): return True
             p.x += 1
             p.y += 1
@@ -117,9 +134,9 @@ class Partie:
         
         if self.alignes(Vecteur(colonne, len(self.grille[colonne]) - 1)):
             self.__finito = True
-        else:
-            self.est_j1 = not self.est_j1
-            self.joueur = self.j1 if self.est_j1 else self.j2
+
+        self.est_j1 = not self.est_j1
+        self.joueur = self.j1 if self.est_j1 else self.j2
     
     def coups_legaux(self) -> list:
         """
@@ -172,8 +189,8 @@ class Pile:
     def retirer(self):
         if self.est_vide(): raise Exception("pile vide sah")
         i = len(self.__data) - 1
-        while (self.__data[i] == 0):
-            i += 1
+        while i >= 0 and self.__data[i] == 0:
+            i -= 1
         self.__data[i] = 0
     
     def est_vide(self) -> bool:

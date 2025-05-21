@@ -3,14 +3,15 @@ from random import choice, choices
 from time import sleep
 
 class Bot(Joueur):
-    PROFONDEUR = 6
+    PROFONDEUR = 5
+
     Partie = None
 
     def __init__(self, prenom, pion, t):
         super().__init__(prenom, pion, t)
         
     @staticmethod
-    def set_partie_ref(partie: Partie):
+    def set_partie_ref(partie):
         Bot.Partie = partie
 
     @staticmethod
@@ -49,37 +50,39 @@ class Bot(Joueur):
         cote = Bot.Partie.est_j1
         taille = Bot.Partie.dimention.x
         scores = [0] * taille
-        i = 0
         for i in choix:
             sc = PileMaisNormal()
+            sc.add(Bot.Partie.get_pire() * 10000)
             Bot.Partie.jouer_coup(i)
             pile = PileMaisNormal()
             pile.add(Bot.Partie.coups_legaux())
-            sc.add(10000 if Bot.Partie.est_j1 else -10000)
             while not pile.is_empty:
-                if Bot.Partie.finito or len(pile.peek) == 0 or pile.height > Bot.PROFONDEUR:
-                    scores[i] += Bot.Partie.get_score()
+                if Bot.Partie.finito or pile.height > Bot.PROFONDEUR or len(pile.peek) == 0:
+                    if len(pile.peek) > 0:
+                        a = Bot.Partie.get_score()
+                        sc.edit(a * 10000)
+                        scores[i] += a
+                    #print(sc)
                     pile.pop()
-                    if not pile.is_empty:
-                        #print(" <- ",sc)
+                    if pile.is_empty:
+                        #print("to score =>",sc)
+                        scores[i] += sc.peek
+                    else:
                         s = sc.pop()
-                        if (s != 0):
-                            pass
                         if Bot.Partie.est_j1:
-                            sc.edit(max(sc.peek, s))
+                            sc.edit(min(s, sc.peek))
                         else:
-                            sc.edit(min(sc.peek, s))
-                        #print(sc)
-                        if len(pile.peek) > 0:
-                            pile.peek.pop(0)
-                        Bot.Partie.defaire()
+                            sc.edit(max(s, sc.peek))
+
+                    Bot.Partie.defaire()
+                    #print(sc)
                 else:
+                    sc.add(Bot.Partie.get_pire() * 10000)
                     Bot.Partie.jouer_coup(pile.peek[0])
+                    pile.peek.pop(0)
                     pile.add(Bot.Partie.coups_legaux())
-                    sc.add(10000 if Bot.Partie.est_j1 else -10000)
-            #print(sc)
-            scores[i] += sc.peek
-            Bot.Partie.defaire()
-            i += 1
-        #print(scores)
-        return Bot.get_min(scores, choix) if cote else Bot.get_max(scores, choix)
+
+            
+        print(scores)
+        print(Bot.Partie.est_j1)
+        return Bot.get_max(scores, choix) if cote else Bot.get_min(scores, choix)
