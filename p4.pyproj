@@ -22,16 +22,25 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="graphismes.py" />
     <Compile Include="bot.py" />
     <Compile Include="main.py" />
     <Compile Include="puissance4.py" />
     <Compile Include="server.py" />
+    <Compile Include="variante.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Pipfile\" />
+    <Folder Include="Content\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="requirements.txt" />
+    <Content Include="Content\background_settings_1.png" />
+    <Content Include="Content\button_1.png" />
+    <Content Include="Content\discord.png" />
+    <Content Include="Content\play_w_friend.png" />
+    <Content Include="Content\play_w_ia-11.png" />
+    <Content Include="Content\settings.png" />
+    <Content Include="Content\sound-on.png" />
+    <Content Include="README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

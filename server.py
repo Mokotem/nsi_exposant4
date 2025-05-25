@@ -1,9 +1,10 @@
 import socket as Sock
 import threading as Thread
 from time import sleep
+import select
 
 class Machine:  # client chez la machine de l'utilisateur
-    SERVER_ADRESS = "192.168.142.168"
+    SERVER_ADRESS = "192.168.1.19"
     
     def __init__(self):
         self.sock = Sock.socket(Sock.AF_INET, Sock.SOCK_STREAM)
@@ -13,6 +14,7 @@ class Machine:  # client chez la machine de l'utilisateur
         self.sock.send(Server.ADVERSAIRE_DECONNECTE)
         
     def Envoyer(self, message: str):
+
         self.sock.send(str(message).encode())
 
     def Recevoir(self):
@@ -64,8 +66,8 @@ class Partie:
             if data.decode() == "p":
                 data = self.invitee.CONNECTION.recv(Client.SIZE)
                 self.host.CONNECTION.send(data)
-                tache = Thread.Thread(target=self.Tache_Communication)
-                tache.start()
+            tache = Thread.Thread(target=self.Tache_Communication)
+            tache.start()
         except:
             self.bloque = True
             self.running = False
@@ -74,21 +76,27 @@ class Partie:
         while self.running:
             try:
                 data = self.host.CONNECTION.recv(Client.SIZE)
-                if data.decode() == "exit":
+                if data.decode() == "exit" or not data:
                     self.running = False
                     self.invitee.Envoyer("deco")
+                    self.Deco()
                 else:
                     self.invitee.CONNECTION.send(data)
                     data = self.invitee.CONNECTION.recv(Client.SIZE)
-                    if data.decode() == "exit":
+                    if data.decode() == "exit" or not data:
                         self.host.Envoyer("deco")
                         self.invitee = None
                         self.bloque = False
+                        self.Deco()
                     else:
                         self.host.CONNECTION.send(data)
             except:
                 self.bloque = True
                 self.running = False
+
+    def Deco(self):
+        self.host.CONNECTION.close()
+        self.invitee.CONNECTION.close()
 
 class Server:
     PORT = 8080
@@ -113,10 +121,11 @@ class Server:
         
     def Tache_Nettoyage(self):
         while self.running:
-            sleep(1)
+            sleep(3)
             i = 0
             while i < len(self.parties):
                 if (not self.parties[i].running):
+                    self.parties[i].Deco()
                     self.parties.pop(i)
 
     def Tache_Connections(self):

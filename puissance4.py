@@ -42,13 +42,13 @@ class Partie:
         
         # si la partie est fini
         self.__finito = False
-        self.__ligneChiffres = " "
+        self.__ligneChiffres = "   "
         y = 0
         while y < self.dimention.x:
             self.__ligneChiffres += str(y + 1) + " "
             y += 1
             
-        self.__pileDesCoups = PileMaisNormal()
+        self.pileDesCoups = PileMaisNormal()
         
     def get_score(self):
         if self.__finito:
@@ -61,15 +61,17 @@ class Partie:
     @property
     def finito(self):
         return self.__finito
+
+    def finir(self):
+        self.__finito = True
         
     def defaire(self):
         """
         annule le dernier coup joue.
         """
         self.__finito = False
-        self.grille[self.__pileDesCoups.pop()].retirer()
-        self.est_j1 = not self.est_j1
-        self.joueur = self.j1 if self.est_j1 else self.j2
+        self.grille[self.pileDesCoups.pop()].retirer()
+        self.changer_de_joueur()
         
         
     def alignes(self, pos):
@@ -130,14 +132,17 @@ class Partie:
         (entree: int colonne)
         """
         self.grille[colonne].empiler(self.est_j1 + 1)
-        self.__pileDesCoups.add(colonne)
+        self.pileDesCoups.add(colonne)
         
         if self.alignes(Vecteur(colonne, len(self.grille[colonne]) - 1)):
             self.__finito = True
 
+        self.changer_de_joueur()
+    
+    def changer_de_joueur(self):
         self.est_j1 = not self.est_j1
         self.joueur = self.j1 if self.est_j1 else self.j2
-    
+
     def coups_legaux(self) -> list:
         """
         renvoie les colonnes qui sont jouable sur le
@@ -154,10 +159,22 @@ class Partie:
         return res
     
     def afficher(self) -> None:
+        print(self.j1.nom, "   VS   ", self.j2.nom)
+        if not self.pileDesCoups.is_empty:
+            dernier = self.pileDesCoups.peek
+            s = "   "
+            y = 0
+            while y < dernier:
+                s += "  "
+                y += 1
+            s += "."
+            print(s)
+        else:
+            print("")
         print(self.__ligneChiffres)
         y = self.dimention.y - 1
         while y >= 0:
-            ligne = "|"
+            ligne = "  |"
             x = 0
             while x < self.dimention.x:
                 if (self.grille[x][y] == 2):
@@ -169,7 +186,6 @@ class Partie:
                 x += 1
             print(ligne)
             y += -1
-        
         
 class Pile:
     def __init__(self, longueur: int):
@@ -234,6 +250,7 @@ class Joueur:
         """
         self.nom = nom
         self.pion = char
+        self.limiteDeTemps = t > 0
         self.temps = t #temps en secondes
 
     def reste_du_temps(self) -> bool:
@@ -241,7 +258,7 @@ class Joueur:
         verifie s'il reste du temps au joueur.
         :return: True si le joueur a encore du temps, False sinon.
         """
-        return self.temps > 0
+        return (self.limiteDeTemps and self.temps > 0) or not self.limiteDeTemps
 
     def choisir(self, choix: list) -> int:
         """
@@ -253,7 +270,11 @@ class Joueur:
         debut = time.time()
         coup = -1
         while coup not in choix:
-            entree = input(self.nom + " (" + self.pion + ") " + str(round(self.temps)) + "s > ")
+            entree = ""
+            if self.limiteDeTemps:
+                entree = input(self.nom + " - " + str(round(self.temps)) + "s (" + self.pion + ")> ")
+            else:
+                entree = input(self.nom + " - (" + self.pion + ")> ")
             i = 0
             while i < len(entree) and '0' <= entree[i] <= '9':#pour s'assurer que l'entree ne contient que des chiffres
                 i += 1
@@ -263,7 +284,9 @@ class Joueur:
                     print("Cette colonne n'est pas jouable, essayez encore.")
             else:
                 print("Entree invalide, veuillez entrer un nombre.")
-        self.temps -= (time.time() - debut) #mise a jour de temps restant
+
+        if self.limiteDeTemps:
+            self.temps -= (time.time() - debut) #mise a jour de temps restant
 
         return coup
 
