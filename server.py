@@ -4,7 +4,7 @@ from time import sleep
 import select
 
 class Machine:  # client chez la machine de l'utilisateur
-    SERVER_ADRESS = "192.168.1.19"
+    SERVER_ADRESS = "34.163.70.6"  # ADRESSE google cloud
     
     def __init__(self):
         self.sock = Sock.socket(Sock.AF_INET, Sock.SOCK_STREAM)
@@ -99,7 +99,7 @@ class Partie:
         self.invitee.CONNECTION.close()
 
 class Server:
-    PORT = 8080
+    PORT = 3389
     PARTIE_LIMIT = 8
     PARTIE_BLOQUEE = "b".encode()
     CODE_REQUI = "c".encode()
