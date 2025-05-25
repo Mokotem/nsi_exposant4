@@ -207,7 +207,6 @@ j2 = None
 tetris = False
 G.OnLocalSelected = JouerEnLocal
 G.OnOnlineSelected = JouerEnReseau
-tacheGraphisme = Thread(target = G.StartMenu)
 
 if __name__ == "__main__":
     G.StartMenu()
