@@ -41,7 +41,7 @@ class Partie:
         self.est_j1 = True
         
         # si la partie est fini
-        self.__finito = False
+        self.finito = False
         self.__ligneChiffres = "   "
         y = 0
         while y < self.dimention.x:
@@ -51,30 +51,28 @@ class Partie:
         self.pileDesCoups = PileMaisNormal()
         
     def get_score(self):
-        if self.__finito:
+        if self.finito:
             return -1 if self.est_j1 else 1
         return 0
 
     def get_pire(self):
         return 1 if self.est_j1 else -1
-        
-    @property
-    def finito(self):
-        return self.__finito
 
     def finir(self):
-        self.__finito = True
+        self.finito = True
         
     def defaire(self):
         """
         annule le dernier coup joue.
         """
-        self.__finito = False
+        self.finito = False
         self.grille[self.pileDesCoups.pop()].retirer()
         self.changer_de_joueur()
         
         
     def alignes(self, pos):
+        if self.grille[pos.x][pos.y] < 1:
+            return False
         pion = self.grille[pos.x][pos.y]
         streak = 0
         p = Vecteur(0, 0)
@@ -135,7 +133,7 @@ class Partie:
         self.pileDesCoups.add(colonne)
         
         if self.alignes(Vecteur(colonne, len(self.grille[colonne]) - 1)):
-            self.__finito = True
+            self.finito = True
 
         self.changer_de_joueur()
     
@@ -190,6 +188,10 @@ class Partie:
 class Pile:
     def __init__(self, longueur: int):
         self.__data = [0] * longueur  # initialise une pile vide de taille `longueur`
+        self.__capa = longueur
+
+    @property
+    def capacity(self): return self.__capa
 
     def empiler(self, joueur: int):
         """
@@ -213,7 +215,18 @@ class Pile:
         return all(val == 0 for val in self.__data)
 
     def vider(self) -> None:
-        self.__data = [0] * len(self.__data)
+        d = list()
+        while len(d) < self.capacity:
+            d.append(0)
+        self.__data = d
+
+    def copier(self):
+        p = Pile(self.__capa)
+        i = 0
+        while i < self.__capa:
+            p.empiler(self.__data[i])
+            i += 1
+        return p
 
     def est_plein(self) -> bool:
         return all(val != 0 for val in self.__data)
