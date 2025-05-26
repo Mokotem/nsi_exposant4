@@ -68,7 +68,7 @@ class Bot(Joueur):
                     if len(pile.peek) > 0:
                         a = Bot.Partie.get_score()
                         sc.edit(a * 10000)
-                        #scores[i] += a
+                        scores[i] += a
                     #print(sc)
                     pile.pop()
                     if pile.is_empty:
